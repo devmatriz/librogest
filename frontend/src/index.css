@@ -37,27 +37,31 @@
   -webkit-font-smoothing: antialiased;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --papel: #121715;
-    --superficie: #1a201e;
-    --superficie-hundida: #0e1211;
-    --tinta: #e6eae4;
-    --tinta-suave: #9aa59f;
-    --linea: #2c3531;
-    --botella: #8fcbb9;
-    --botella-hover: #a9dccc;
-    --sobre-botella: #10201c;
-    --mostaza: #d9b54a;
-    --madera: #2a211b;
-    --exito: #8fcf9c;
-    --alerta: #e0a95a;
-    --peligro: #f0948a;
-    --peligro-fondo: #3a1d1a;
-    --exito-fondo: #17291c;
-    --sombra-libro: 0 1px 1px rgb(0 0 0 / 0.4), 0 12px 20px -10px rgb(0 0 0 / 0.8);
-    color-scheme: dark;
-  }
+/* Modo oscuro: index.html fija data-theme antes de pintar (elección guardada o la del sistema) */
+:root[data-theme='dark'] {
+  --papel: #121715;
+  --superficie: #1a201e;
+  --superficie-hundida: #0e1211;
+  --tinta: #e6eae4;
+  --tinta-suave: #9aa59f;
+  --linea: #2c3531;
+  --botella: #8fcbb9;
+  --botella-hover: #a9dccc;
+  --sobre-botella: #10201c;
+  --mostaza: #d9b54a;
+  --madera: #2a211b;
+  --exito: #8fcf9c;
+  --alerta: #e0a95a;
+  --peligro: #f0948a;
+  --peligro-fondo: #3a1d1a;
+  --exito-fondo: #17291c;
+  --sombra-libro: 0 1px 1px rgb(0 0 0 / 0.4), 0 12px 20px -10px rgb(0 0 0 / 0.8);
+  color-scheme: dark;
+}
+
+/* Transición suave solo al pulsar el botón de tema (la clase la pone useTema) */
+:root.cambiando-tema, :root.cambiando-tema *, :root.cambiando-tema *::before, :root.cambiando-tema *::after {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
 }
 
 /* ---------- Base ---------- */
@@ -203,6 +207,9 @@ input::placeholder, textarea::placeholder { color: var(--tinta-suave); opacity: 
   .navbar__enlaces .boton { padding-inline: 0.7rem; }
 }
 @media (max-width: 400px) {
+  .marca { font-size: 1.15rem; gap: 0.4rem; }
+  .marca__icono { width: 24px; height: 24px; }
+  .navbar__enlaces { gap: 0; }
   .navbar__enlaces .boton--fantasma:not(:only-child) { padding-inline: 0.5rem; }
   .navbar__registro { display: none; }
 }
@@ -607,12 +614,15 @@ input::placeholder, textarea::placeholder { color: var(--tinta-suave); opacity: 
 .pie { border-top: 1px solid var(--linea); padding-block: 2rem; color: var(--tinta-suave); font-size: 0.875rem; }
 
 /* ---------- Carrito en la barra y menú de cuenta ---------- */
-.boton-carrito {
-  position: relative; display: inline-grid; place-items: center;
-  width: 2.5rem; height: 2.5rem; border-radius: 50%; color: var(--tinta);
+.boton-icono {
+  position: relative; display: inline-grid; place-items: center; flex: none;
+  width: 2.5rem; height: 2.5rem; padding: 0; border: 0; border-radius: 50%;
+  background: none; color: var(--tinta); cursor: pointer;
 }
-.boton-carrito:hover, .boton-carrito.active { background: var(--superficie-hundida); color: var(--tinta); }
-.boton-carrito svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linejoin: round; stroke-linecap: round; }
+.boton-icono:hover, .boton-icono.active { background: var(--superficie-hundida); color: var(--tinta); }
+.boton-icono svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linejoin: round; stroke-linecap: round; }
+.boton-tema svg { width: 20px; height: 20px; }
+.boton-tema:active svg { rotate: 25deg; transition: rotate 0.15s; }
 .boton-carrito__cuenta {
   position: absolute; top: 0; right: -2px;
   min-width: 1.15rem; height: 1.15rem; padding: 0 0.3rem; border-radius: 999px;

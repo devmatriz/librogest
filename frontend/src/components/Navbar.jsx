@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCarrito } from '../context/CarritoContext';
+import { useTema } from '../hooks/useTema';
 
 export default function Navbar() {
   const { usuario } = useAuth();
@@ -24,9 +25,10 @@ export default function Navbar() {
         <Buscador key={qActual} inicial={qActual} />
 
         <nav className="navbar__enlaces" aria-label="Principal">
+          <BotonTema />
           <NavLink
             to="/carrito"
-            className="boton-carrito"
+            className="boton-icono boton-carrito"
             aria-label={unidades ? `Carrito, ${unidades} ${unidades === 1 ? 'libro' : 'libros'}` : 'Carrito vacío'}
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -50,6 +52,26 @@ export default function Navbar() {
         </nav>
       </div>
     </header>
+  );
+}
+
+function BotonTema() {
+  const { tema, alternar } = useTema();
+  const oscuro = tema === 'oscuro';
+  const texto = oscuro ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro';
+  return (
+    <button type="button" className="boton-icono boton-tema" onClick={alternar} aria-label={texto} title={texto}>
+      {oscuro ? (
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4" />
+        </svg>
+      ) : (
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" />
+        </svg>
+      )}
+    </button>
   );
 }
 

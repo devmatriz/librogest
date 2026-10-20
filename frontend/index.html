@@ -5,6 +5,15 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LibroGest</title>
+    <script>
+      // Aplica el tema antes de pintar para evitar un destello del tema equivocado
+      (function () {
+        var guardado = null;
+        try { guardado = localStorage.getItem('librogest_tema'); } catch (e) {}
+        var oscuro = guardado ? guardado === 'oscuro' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.dataset.theme = oscuro ? 'dark' : 'light';
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
