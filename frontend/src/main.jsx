@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { CarritoProvider } from './context/CarritoContext';
 import App from './App';
 import '@fontsource-variable/literata';
 import '@fontsource-variable/public-sans';
@@ -11,7 +12,9 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
-        <App />
+        <CarritoProvider>
+          <App />
+        </CarritoProvider>
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>

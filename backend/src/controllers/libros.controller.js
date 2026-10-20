@@ -52,10 +52,10 @@ async function resolverCategoria(valor) {
 
 /**
  * GET /api/libros
- * Query: q, categoria, autor, min, max, disponibles=true, orden, page, limit
+ * Query: q, categoria, autor, ids (separados por comas), min, max, disponibles=true, orden, page, limit
  */
 export async function listar(req, res) {
-  const { q, categoria, autor, min, max, disponibles, orden } = req.query;
+  const { q, categoria, autor, ids, min, max, disponibles, orden } = req.query;
   const paginacion = leerPaginacion(req.query);
   const filtro = {};
 
@@ -70,6 +70,11 @@ export async function listar(req, res) {
   if (autor) {
     if (!mongoose.isValidObjectId(autor)) throw new HttpError(400, 'Identificador de autor no válido');
     filtro.autores = new mongoose.Types.ObjectId(String(autor));
+  }
+
+  if (ids) {
+    const lista = String(ids).split(',').filter((id) => mongoose.isValidObjectId(id));
+    filtro._id = { $in: lista.map((id) => new mongoose.Types.ObjectId(id)) };
   }
 
   if (min !== undefined || max !== undefined) {

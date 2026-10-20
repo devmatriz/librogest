@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import api, { mensajeError } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { MAX_POR_LIBRO, useCarrito } from '../context/CarritoContext';
+import SelectorCantidad from '../components/SelectorCantidad';
 import { formatearPrecio } from '../config';
 import Portada from '../components/Portada';
 import Estrellas from '../components/Estrellas';
@@ -81,17 +83,7 @@ function Detalle({ id }) {
             </a>
           )}
 
-          <div className="compra">
-            <p className="precio precio--grande">{formatearPrecio(libro.precio)}</p>
-            <p className={`disponibilidad${libro.stock === 0 ? ' disponibilidad--agotado' : ''}`}>
-              <span className="disponibilidad__punto" aria-hidden="true" />
-              {libro.stock === 0
-                ? 'Agotado por ahora'
-                : libro.stock <= 5
-                  ? `Quedan ${libro.stock} ejemplares`
-                  : 'En stock, listo para enviar'}
-            </p>
-          </div>
+          <Compra libro={libro} />
 
           {libro.descripcion && <p className="detalle__descripcion">{libro.descripcion}</p>}
 
@@ -109,6 +101,58 @@ function Detalle({ id }) {
 
       {autorPrincipal && <MasDelAutor autor={autorPrincipal} excluir={libro._id} />}
     </>
+  );
+}
+
+function Compra({ libro }) {
+  const { agregar, cantidadDe } = useCarrito();
+  const enCarrito = cantidadDe(libro._id);
+  const disponibles = Math.max(0, Math.min(MAX_POR_LIBRO, libro.stock) - enCarrito);
+  const [cantidad, setCantidad] = useState(1);
+  const [añadidas, setAñadidas] = useState(0);
+
+  function añadir() {
+    const n = agregar(libro, Math.min(cantidad, disponibles));
+    setAñadidas(n);
+    setCantidad(1);
+  }
+
+  return (
+    <div className="compra">
+      <div className="compra__fila">
+        <p className="precio precio--grande">{formatearPrecio(libro.precio)}</p>
+        <p className={`disponibilidad${libro.stock === 0 ? ' disponibilidad--agotado' : ''}`}>
+          <span className="disponibilidad__punto" aria-hidden="true" />
+          {libro.stock === 0
+            ? 'Agotado por ahora'
+            : libro.stock <= 5
+              ? `Quedan ${libro.stock} ejemplares`
+              : 'En stock, listo para enviar'}
+        </p>
+      </div>
+
+      {libro.stock > 0 && (
+        disponibles > 0 ? (
+          <div className="compra__acciones">
+            <SelectorCantidad valor={Math.min(cantidad, disponibles)} max={disponibles} onCambiar={setCantidad} />
+            <button type="button" className="boton boton--primario compra__boton" onClick={añadir}>
+              Añadir al carrito
+            </button>
+          </div>
+        ) : (
+          <p className="nota">Ya tienes en el carrito todos los ejemplares que puedes pedir.</p>
+        )
+      )}
+
+      {(añadidas > 0 || enCarrito > 0) && (
+        <p className="compra__aviso" role="status">
+          {añadidas > 0
+            ? `${añadidas === 1 ? 'Añadido' : `${añadidas} añadidos`} al carrito. `
+            : `Tienes ${enCarrito} en el carrito. `}
+          <Link to="/carrito">Ver carrito</Link>
+        </p>
+      )}
+    </div>
   );
 }
 

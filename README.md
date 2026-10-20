@@ -48,8 +48,22 @@ Las rutas protegidas requieren la cabecera `Authorization: Bearer <token>`.
 | GET | `/api/autores?q=` | 🌐 | Autores (búsqueda por nombre) |
 | GET | `/api/autores/:id` | 🌐 | Autor con sus libros |
 | POST / PUT / DELETE | `/api/autores[/:id]` | 🔒 | Gestión de autores |
-| GET | `/api/categorias[/:id]` | 🌐 | Categorías |
+| GET | `/api/categorias[/:id]` | 🌐 | Categorías (con `numLibros`) |
 | POST / PUT / DELETE | `/api/categorias[/:id]` | 🔒 | Gestión de categorías (slug automático) |
+| POST | `/api/pedidos` | 👤 | Crear pedido: `{ items: [{ libro, cantidad }], direccionEnvio? }` |
+| GET | `/api/pedidos/mios` | 👤 | Mis pedidos (paginado) |
+| GET | `/api/pedidos/:id` | 👤 | Detalle (solo el dueño o un admin) |
+| POST | `/api/pedidos/:id/cancelar` | 👤 | Cancelar un pedido pendiente (devuelve el stock) |
+| GET | `/api/pedidos?estado=` | 🔒 | Todos los pedidos |
+| PATCH | `/api/pedidos/:id/estado` | 🔒 | Cambiar estado: pendiente → pagado → enviado → entregado (o cancelado) |
+
+### Pedidos y stock
+- Los precios se toman siempre de la base de datos, no del cliente.
+- El stock se descuenta con una operación atómica por libro (`stock >= cantidad`), así que dos
+  compras simultáneas nunca dejan el stock en negativo. Si un libro falla, se devuelve el stock
+  ya descontado de los demás.
+- Al cancelar un pedido se devuelve el stock.
+- El pago es por transferencia: los datos bancarios que ve el cliente están en `frontend/src/config.js`.
 
 Parámetros de `GET /api/libros`:
 `q` (búsqueda de texto), `categoria` (id o slug), `autor` (id), `min`, `max`,

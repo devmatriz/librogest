@@ -1,18 +1,14 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useCarrito } from '../context/CarritoContext';
 
 export default function Navbar() {
-  const { usuario, logout } = useAuth();
-  const navigate = useNavigate();
+  const { usuario } = useAuth();
+  const { unidades } = useCarrito();
   const location = useLocation();
   const [params] = useSearchParams();
   const qActual = location.pathname === '/' ? params.get('q') ?? '' : '';
-
-  function salir() {
-    logout();
-    navigate('/');
-  }
 
   return (
     <header className="navbar">
@@ -28,14 +24,21 @@ export default function Navbar() {
         <Buscador key={qActual} inicial={qActual} />
 
         <nav className="navbar__enlaces" aria-label="Principal">
+          <NavLink
+            to="/carrito"
+            className="boton-carrito"
+            aria-label={unidades ? `Carrito, ${unidades} ${unidades === 1 ? 'libro' : 'libros'}` : 'Carrito vacío'}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 7h14l-1.2 11.1a2 2 0 0 1-2 1.9H8.2a2 2 0 0 1-2-1.9z" />
+              <path d="M9 10V6.5a3 3 0 0 1 6 0V10" />
+            </svg>
+            {unidades > 0 && <span className="boton-carrito__cuenta" aria-hidden="true">{unidades}</span>}
+          </NavLink>
+
           {usuario ? (
-            <>
-              <NavLink to="/perfil" className="navbar__usuario">
-                <span className="avatar" aria-hidden="true">{usuario.nombre.charAt(0).toUpperCase()}</span>
-                <span className="navbar__nombre">{usuario.nombre.split(' ')[0]}</span>
-              </NavLink>
-              <button type="button" className="boton boton--fantasma" onClick={salir}>Cerrar sesión</button>
-            </>
+            // key: el menú se cierra al cambiar de página
+            <MenuCuenta key={location.pathname} />
           ) : (
             <>
               <NavLink to="/login" state={{ desde: location.pathname + location.search }} className="boton boton--fantasma">
@@ -47,6 +50,60 @@ export default function Navbar() {
         </nav>
       </div>
     </header>
+  );
+}
+
+function MenuCuenta() {
+  const { usuario, logout } = useAuth();
+  const navigate = useNavigate();
+  const [abierto, setAbierto] = useState(false);
+  const ref = useRef(null);
+
+  // Cierra al hacer clic fuera o al pulsar Escape
+  useEffect(() => {
+    if (!abierto) return;
+    const fuera = (e) => { if (!ref.current?.contains(e.target)) setAbierto(false); };
+    const escape = (e) => {
+      if (e.key === 'Escape') {
+        setAbierto(false);
+        ref.current?.querySelector('button')?.focus();
+      }
+    };
+    document.addEventListener('pointerdown', fuera);
+    document.addEventListener('keydown', escape);
+    return () => {
+      document.removeEventListener('pointerdown', fuera);
+      document.removeEventListener('keydown', escape);
+    };
+  }, [abierto]);
+
+  function salir() {
+    logout();
+    navigate('/');
+  }
+
+  return (
+    <div className="menu-cuenta" ref={ref}>
+      <button
+        type="button"
+        className="navbar__usuario"
+        aria-expanded={abierto}
+        aria-controls="menu-cuenta"
+        onClick={() => setAbierto((v) => !v)}
+      >
+        <span className="avatar" aria-hidden="true">{usuario.nombre.charAt(0).toUpperCase()}</span>
+        <span className="navbar__nombre">{usuario.nombre.split(' ')[0]}</span>
+        <svg className="menu-cuenta__flecha" viewBox="0 0 12 12" aria-hidden="true"><path d="m3 4.5 3 3 3-3" /></svg>
+      </button>
+      {abierto && (
+        <div className="menu-cuenta__panel" id="menu-cuenta">
+          <p className="menu-cuenta__email">{usuario.email}</p>
+          <Link to="/pedidos">Mis pedidos</Link>
+          <Link to="/perfil">Mi perfil</Link>
+          <button type="button" onClick={salir}>Cerrar sesión</button>
+        </div>
+      )}
+    </div>
   );
 }
 
